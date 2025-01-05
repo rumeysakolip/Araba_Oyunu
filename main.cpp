@@ -9,10 +9,12 @@
 
 using namespace std;
 
+// Programda kullanılan zamanlama işlevi, milisaniye cinsinden bekleme sağlar.
 void bekle(int milisaniye) {
     this_thread::sleep_for(chrono::milliseconds(milisaniye));
 }
 
+// Yakıt seviyesini görselleştiren bir çizgi çubuğu oluşturur.
 void cizgiCubugu(double seviye, double maxDepo) {
     int bar = (int)((seviye / maxDepo) * 10); // Maksimum yakıt deposuna göre ölçeklendirme
     cout << "[";
@@ -23,6 +25,7 @@ void cizgiCubugu(double seviye, double maxDepo) {
     cout << "] " << seviye << " litre\n";
 }
 
+// Yarışın başlangıç animasyonunu konsolda gösterir.
 void yarisAnimasyonu() {
     for (int i = 0; i <= 10; ++i) {
         cout << "\rYaris Basliyor: [";
@@ -34,17 +37,20 @@ void yarisAnimasyonu() {
     cout << "\n\n";
 }
 
+// Araç sınıfı, oyundaki araçları tanımlayan sınıftır.
 class Arac {
 public:
-    string isim;
-    double benzinTuketimi;
-    int gelistirmeSeviyesi;
-    double yakitDeposu;
-    double maxYakitDeposu;
+    string isim;    // Araç ismi
+    double benzinTuketimi;  // 100 km başına yakıt tüketimi
+    int gelistirmeSeviyesi; // Araç geliştirme seviyesi
+    double yakitDeposu;     // Mevcut yakıt miktarı
+    double maxYakitDeposu;  // Maksimum yakıt kapasitesi
 
+    // Araç için yapıcı fonksiyon
     Arac(string n, double bt, double maxDepo)
         : isim(n), benzinTuketimi(bt), gelistirmeSeviyesi(0), yakitDeposu(maxDepo), maxYakitDeposu(maxDepo) {}
 
+    // Araç geliştirme işlevi, yakıt tüketimini azaltır.
     void gelistir() {
         if (gelistirmeSeviyesi < 10) {
             gelistirmeSeviyesi++;
@@ -55,45 +61,54 @@ public:
         }
     }
 
+    // Belirli bir mesafe için gereken yakıt miktarını hesaplar.
     double benzinHesapla(double mesafe) {
         return (mesafe/20) * benzinTuketimi;
     }
 };
 
+// Yarış alanlarını temsil eden sınıf.
 class YarisAlani {
 public:
-    string isim;
-    double benzinFiyati;
-    double kmBasinaOdeme;
+    string isim;    // Yarış alanı adı
+    double benzinFiyati;    // Benzin fiyatı (litre başına)
+    double kmBasinaOdeme;   // Kilometre başına ödeme miktarı
 
+    // Yarış alanı için yapıcı fonksiyon
     YarisAlani(string n, double bf, double kbo)
         : isim(n), benzinFiyati(bf), kmBasinaOdeme(kbo) {}
 };
 
+// Oyuncu sınıfı, oyuncunun durumunu ve eylemlerini tanımlar.
 class Oyuncu {
 public:
-    string isim;
-    double para;
-    int puan;
-    double toplamMesafe;
-    Arac* arac;
-    YarisAlani* yarisAlani;
+    string isim;    // Oyuncunun adı
+    double para;    // Oyuncunun mevcut parası
+    int puan;       // Oyuncunun puanı
+    double toplamMesafe;    // Oyuncunun toplam kat ettiği mesafe
+    Arac* arac;     // Oyuncunun sahip olduğu araç
+    YarisAlani* yarisAlani; // Oyuncunun seçtiği yarış alanı
 
+    // Oyuncu için yapıcı fonksiyon
     Oyuncu(string n, double baslangicPara)
         : isim(n), para(baslangicPara), puan(0), toplamMesafe(0), arac(nullptr), yarisAlani(nullptr) {}
 
+    // Oyuncunun araç seçmesini sağlar.
     void aracSec(Arac* a) {
         arac = a;
     }
 
+    // Oyuncunun yarış alanı seçmesini sağlar.
     void yarisAlaniSec(YarisAlani* ya) {
         yarisAlani = ya;
     }
 
+    // Oyuncunun toplam mesafesine yeni mesafe ekler.
     void mesafeEkle(double mesafe) {
         toplamMesafe += mesafe;
     }
 
+    // Oyuncunun yakıt almasını sağlar.
     void benzinAl(double miktar) {
         double maliyet = miktar * yarisAlani->benzinFiyati;
         if (para >= maliyet) {
@@ -106,14 +121,17 @@ public:
     }
 };
 
+// Oyun yöneticisi, oyunun genel kontrolünü sağlar.
 class OyunYoneticisi {
 public:
-    Oyuncu* oyuncu;
+    Oyuncu* oyuncu; // Oyunun oyuncusu
     vector<Arac*> araclar; // Araç listesi burada tanımlandı
-    vector<YarisAlani*> alanlar;
+    vector<YarisAlani*> alanlar; // Kullanılabilir yarış alanları listesi
 
+    // Oyun yöneticisi için yapıcı fonksiyon
     OyunYoneticisi() : oyuncu(nullptr) {}
 
+    // Oyunun durumunu gösteren bir durum çubuğu.
     void durumCubugu() {
         cout << "\033[1;36m==================== DURUM ====================\033[0m\n";
         cout << "Benzin Durumu: ";
@@ -123,6 +141,7 @@ public:
         cout << "\033[1;36m==============================================\033[0m\n";
     }
 
+    // Oyunun başlangıç aşamasını başlatır.
     void oyunuBaslat() {
         string isim;
         double baslangicPara = 500.0; // Oyuncunun başlangıç bütçesi
@@ -135,6 +154,7 @@ public:
         cout << "\nHos geldiniz, \033[1;32m" << isim << "\033[0m! Baslangic butceniz: $" << baslangicPara << "\n\n";
     }
 
+    // Yarış kurulumunu yapar.
     void yarisKurulumu() {
         araclar = {
             new Arac("Taksi", 2.0, 30.0),
@@ -151,6 +171,7 @@ public:
             new YarisAlani("Sehir", 4.0, 1.2)
         };
 
+        // Oyuncunun araç seçimini sağlar.
         cout << "\033[1;33mMevcut Araclar:\033[0m\n";
         for (size_t i = 0; i < araclar.size(); ++i) {
             cout << i + 1 << ". " << left << setw(10) << araclar[i]->isim
@@ -171,6 +192,7 @@ public:
         oyuncu->aracSec(araclar[aracSecim - 1]);
         cout << "\nSectiginiz arac: \033[1;32m" << araclar[aracSecim - 1]->isim << "\033[0m\n";
 
+        // Oyuncunun yarış alanı seçimini sağlar.
         cout << "\033[1;33mMevcut Yaris Alanlari:\033[0m\n";
         for (size_t i = 0; i < alanlar.size(); ++i) {
             cout << i + 1 << ". " << left << setw(10) << alanlar[i]->isim
@@ -277,6 +299,7 @@ public:
         }
     }
 
+    // Oyunun ana döngüsü olan yarış işlevini başlatır.
     void yarisiBaslat() {
         char devamMi = 'E';
         random_device rd;
@@ -356,10 +379,11 @@ public:
     }
 };
 
+// Programın başlangıç noktası.
 int main() {
     OyunYoneticisi oyunYoneticisi;
-    oyunYoneticisi.oyunuBaslat();
-    oyunYoneticisi.yarisKurulumu();
-    oyunYoneticisi.yarisiBaslat();
+    oyunYoneticisi.oyunuBaslat(); // Oyunu başlatır.
+    oyunYoneticisi.yarisKurulumu(); // Yarış için kurulumları yapar.
+    oyunYoneticisi.yarisiBaslat(); // Yarış başlatılır.
     return 0;
 }
